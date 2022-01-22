@@ -18,6 +18,7 @@ roles:
     aka: [browser, user-agent, resource-owner]
     ref:
       url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.1
+      section: "1.1"
       desc: An entity capable of granting access to a protected resource. When the resource owner is a person, it is referred to as an end-user.
     icon: 👤
   resource-server:

@@ -3,11 +3,16 @@
 from htmtree import Tree, Node
 from spec import RefBlock
 
-def render_header(spec):
+def render_header(spec, docs):
     ""
     div = Tree.mk('div')
     div.append(Tree.mk('h2', [spec.header.title]))
-    # todo: ref + desc
+    if isinstance(spec.header.ref, RefBlock):
+        anchor = 'head'
+        div.children[-1].append(Tree.mk('sup', [
+            Tree.mk(Node.mk('a', href=f'#{anchor}'), ['?'])
+        ]))
+        docs.append(render_ref(spec.header.title, anchor, spec.header.ref))
     return div
 
 def render_grid_top(spec, docs):
@@ -37,7 +42,7 @@ def render_grid_top(spec, docs):
         ret.append(Tree.mk(Node.mk('div', style=f"grid-column: {i + 1}; text-align: center; font-size: large"), children))
     return ret
 
-def render_payloads(spec, req_res, children):
+def render_payloads(spec, req_res, children, docs, prefix):
     payloads = req_res.payloads()
     if not payloads:
         return
@@ -48,9 +53,14 @@ def render_payloads(spec, req_res, children):
     for name in payloads:
         payload = spec.payloads.get(name)
         if payload:
-            # todo: link to ref
             # todo: img url icon
-            span.append(f'{payload.icon} {name}')
+            if isinstance(payload.ref, RefBlock):
+                anchor = f'{prefix}-pay-${name}'
+                span.append(Tree.mk(Node.mk('a', href=f'#{anchor}'), [f'{payload.icon} {name}']))
+                docs.append(render_ref(f'Payload: {name}', anchor, payload.ref))
+            else:
+                span.append(f'{payload.icon} {name}')
+            # todo: also pure RFC link case
         else:
             span.append(name)
 
@@ -87,6 +97,7 @@ def render_grid_step(spec, i, step, docs):
             endpoint,
         ]))
         ret[-1].node.attrs['class'] = 'req'
+        anchor = f'step-{i}-req'
         if endobj and endobj.request:
             if isinstance(endobj.request.ref, RefBlock):
                 docs.append(render_ref(endobj.request.ref))
@@ -95,8 +106,9 @@ def render_grid_step(spec, i, step, docs):
             if endobj.request.auth:
                 # todo: lookup auth
                 ret[-1].append(f'🔒 {endobj.request.auth}')
-            render_payloads(spec, endobj.request, ret[-1].children)
+            render_payloads(spec, endobj.request, ret[-1].children, docs, anchor)
         i += 1
+
     if endobj and endobj.checks:
         ret.append(Tree.mk(Node.mk('div', style=f"grid-row: {i + 1}; grid-column: {col2} / {col2 + 1}"), [
             Tree.mk('div', ['✅', check])
@@ -104,19 +116,25 @@ def render_grid_step(spec, i, step, docs):
         ]))
         ret[-1].node.attrs['class'] = 'checks'
         i += 1
+
     if step.response:
         ret.append(Tree.mk(Node.mk('div', style=f"grid-row: {i + 1}; {col}"), [
             Tree.mk(Node.mk('div', style="float: right"), ['⬅️']),
             endpoint,
         ]))
         ret[-1].node.attrs['class'] = 'res'
+        anchor = f'step-{i}-res'
         if endobj and endobj.response:
+            if isinstance(endobj.response.ref, RefBlock):
+                docs.append(render_ref(endobj.response.ref))
+            elif isinstance(endobj.response.ref, str):
+                ret[-1].append(spec_link(endobj.response.ref))
             if endobj.response.redirect:
                 ret[-1].append(Tree.mk(Node.mk('span', class_='flat-group'), [
                     Tree.mk('b', ['redirect']),
                     endobj.response.redirect,
                 ]))
-            render_payloads(spec, endobj.response, ret[-1].children)
+            render_payloads(spec, endobj.response, ret[-1].children, docs, anchor)
     return ret
 
 def render_grid(spec, docs):
@@ -135,7 +153,7 @@ def render_spec(spec):
     ])
     docs = Tree.mk('div', [Tree.mk('h3', ['Docs'])])
     body.append(open('style.htm').read())
-    body.append(render_header(spec))
+    body.append(render_header(spec, docs))
     body.append(render_grid(spec, docs))
     body.append(docs)
     # todo: docs section

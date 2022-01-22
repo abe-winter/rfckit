@@ -1,0 +1,145 @@
+meta:
+  format: rfckit
+  version: "0.1"
+header:
+  title: oauth 2.0 authorization code grant
+  desc: The authorization code grant type is used to obtain both access tokens and refresh tokens and is optimized for confidential clients. Since this is a redirection-based flow, the client must be capable of interacting with the resource owner's user-agent (typically a web browser) and capable of receiving incoming requests (via redirection) from the authorization server.
+  ref:
+    url: https://datatracker.ietf.org/doc/html/rfc6749#section-4.1
+    section: "4.1"
+  roles:
+  - resource-owner
+  - client
+  - authorization-server
+roles:
+  resource-owner:
+    aka: [browser, user-agent]
+    ref:
+      url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.1
+      desc: An entity capable of granting access to a protected resource. When the resource owner is a person, it is referred to as an end-user.
+    icon: https://upload.wikimedia.org/wikipedia/commons/f/ff/IE_Unix.PNG
+  resource-server:
+    icon: https://en.wikipedia.org/wiki/Gmail#/media/File:Gmail_Icon_(2013-2020).svg
+    ref:
+      url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.1
+      desc: The server hosting the protected resources, capable of accepting and responding to protected resource requests using access tokens.
+  client:
+    icon: https://content.linkedin.com/content/dam/me/business/en-us/amp/brand-site/v2/bg/LI-Bug.svg.original.svg
+    ref:
+      url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.1
+      desc: An application making protected resource requests on behalf of the resource owner and with its authorization.  The term "client" does not imply any particular implementation characteristics (e.g., whether the application executes on a server, a desktop, or other devices).
+  authorization-server:
+    icon: https://en.wikipedia.org/wiki/Gmail#/media/File:Gmail_Icon_(2013-2020).svg
+    ref:
+      url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.1
+      desc: The server issuing access tokens to the client after successfully authenticating the resource owner and obtaining authorization.
+endpoints:
+  authorization:
+    abbrev: auth
+    ref:
+      url: https://datatracker.ietf.org/doc/html/rfc6749#section-3.1
+      desc: used by the client to obtain authorization from the resource owner via user-agent redirection
+    request:
+      ref: https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1
+    response:
+      ref: https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2
+  token:
+    abbrev: tok
+    ref:
+      url: https://datatracker.ietf.org/doc/html/rfc6749#section-3.2
+      desc: used by the client to exchange an authorization grant for an access token, typically with client authentication
+    request:
+      ref: https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3
+    response:
+      ref: https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.4
+  redirection:
+    abbrev: redir
+    ref:
+      url: https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2
+      desc: used by the authorization server to return responses containing authorization credentials to the client via the resource owner user-agent
+payloads:
+  client-identifier:
+    icon: 📛
+    ref:
+      url: https://datatracker.ietf.org/doc/html/rfc6749#section-2.2
+      desc: The authorization server issues the registered client a client identifier -- a unique string representing the registration information provided by the client.
+  requested-scope:
+    icon: 🔬
+    ref:
+      url: https://datatracker.ietf.org/doc/html/rfc6749#section-3.3
+      desc: The authorization and token endpoints allow the client to specify the scope of the access request using the "scope" request parameter. In turn, the authorization server uses the "scope" response parameter to inform the client of the scope of the access token issued. ... The authorization server MAY fully or partially ignore the scope requested by the client.
+  local-state:
+    icon: 📎
+    ref:
+      url: https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1
+      desc: An opaque value used by the client to maintain state between the request and callback.  The authorization server includes this value when redirecting the user-agent back to the client.
+  redirection-uri:
+    icon: 🔄
+    ref:
+      url: https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2
+      desc: After completing its interaction with the resource owner, the authorization server directs the resource owner's user-agent back to the client.  The authorization server redirects the user-agent to the client's redirection endpoint previously established with the authorization server during the client registration process or when making the authorization request.
+  authorization-code:
+    icon: 🔑
+    ref:
+      url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.1
+      desc: The authorization code is obtained by using an authorization server as an intermediary between the client and resource owner.  Instead of requesting authorization directly from the resource owner, the client directs the resource owner to an authorization server (via its user-agent as defined in [RFC2616]), which in turn directs the resource owner back to the client with the authorization code.
+auth:
+  client:
+    url: https://datatracker.ietf.org/doc/html/rfc6749#section-3.2.1
+    desc: Confidential clients or other clients issued client credentials MUST authenticate with the authorization server as described in Section 2.3 when making requests to the token endpoint.
+flow:
+- roles: [resource-owner, client]
+  ref:
+    url: https://datatracker.ietf.org/doc/html/rfc6749#section-4.1
+    section: 4.1 (A)
+  request:
+    endpoint: client-auth
+  response:
+    payload:
+    - kind: querystring
+      contents: [client-identifier, requested-scope, redirection-uri]
+      optional: [local-state]
+    redirect: authorization
+- roles: [resource-owner, authorization-server]
+  ref:
+    url: https://datatracker.ietf.org/doc/html/rfc6749#section-4.1
+    section: 4.1 (A, B, C)
+  request:
+    endpoint: authorization
+  checks:
+  - user-agent is authenticated
+  - resource-owner grants client's access request
+  response:
+    payload:
+    - kind: querystring
+      contents: [authorization-code, local-state]
+    redirect: redirection-uri
+- roles: [resource-owner, client]
+  ref:
+    url: https://datatracker.ietf.org/doc/html/rfc6749#section-4.1
+    section: 4.1 (C)
+    desc: NEXT
+  request:
+    endpoint: redirection-uri
+    payload:
+    - kind: querystring
+      contents: [authorization-code, local-state]
+- roles: [client, authorization-server]
+  ref:
+    url: https://datatracker.ietf.org/doc/html/rfc6749#section-4.1
+    section: 4.1 (D, E)
+  checks:
+  - client is authenticated
+  - authorization-code is valid
+  - redirection-uri matches
+  request:
+    auth: client-creds
+    payload:
+    - contents: [authorization-code, redirection-uri]
+    endpoint: token
+  response:
+    payload:
+    redirect:
+- roles: [resource-owner, client]
+  response:
+    label: log you in or something

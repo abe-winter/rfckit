@@ -1,6 +1,7 @@
 meta:
   format: rfckit
   version: "0.1"
+
 header:
   title: oauth 2.0 authorization code grant
   ref:
@@ -11,15 +12,16 @@ header:
   - resource-owner
   - client
   - authorization-server
+
 roles:
   resource-owner:
-    aka: [browser, user-agent]
+    aka: [browser, user-agent, resource-owner]
     ref:
       url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.1
       desc: An entity capable of granting access to a protected resource. When the resource owner is a person, it is referred to as an end-user.
     icon: https://upload.wikimedia.org/wikipedia/commons/f/ff/IE_Unix.PNG
   resource-server:
-    icon: https://en.wikipedia.org/wiki/Gmail#/media/File:Gmail_Icon_(2013-2020).svg
+    icon: https://upload.wikimedia.org/wikipedia/commons/8/8c/Gmail_Icon_%282013-2020%29.svg
     ref:
       url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.1
       desc: The server hosting the protected resources, capable of accepting and responding to protected resource requests using access tokens.
@@ -29,10 +31,11 @@ roles:
       url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.1
       desc: An application making protected resource requests on behalf of the resource owner and with its authorization.  The term "client" does not imply any particular implementation characteristics (e.g., whether the application executes on a server, a desktop, or other devices).
   authorization-server:
-    icon: https://en.wikipedia.org/wiki/Gmail#/media/File:Gmail_Icon_(2013-2020).svg
+    icon: https://upload.wikimedia.org/wikipedia/commons/8/8c/Gmail_Icon_%282013-2020%29.svg
     ref:
       url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.1
       desc: The server issuing access tokens to the client after successfully authenticating the resource owner and obtaining authorization.
+
 endpoints:
   authorization:
     abbrev: auth
@@ -113,11 +116,13 @@ payloads:
     ref:
       url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.1
       desc: The authorization code is obtained by using an authorization server as an intermediary between the client and resource owner.  Instead of requesting authorization directly from the resource owner, the client directs the resource owner to an authorization server (via its user-agent as defined in [RFC2616]), which in turn directs the resource owner back to the client with the authorization code.
+
 auth:
   client:
     ref:
       url: https://datatracker.ietf.org/doc/html/rfc6749#section-3.2.1
       desc: Confidential clients or other clients issued client credentials MUST authenticate with the authorization server as described in Section 2.3 when making requests to the token endpoint.
+
 flow:
 - roles: [resource-owner, client]
   ref:

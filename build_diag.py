@@ -38,14 +38,22 @@ def render_grid_step(spec, i, step):
     endobj = spec.endpoints.get(step.endpoint)
     if step.request:
         ret.append(Tree.mk(Node.mk('div', style=f"grid-row: {i + 1}; {col}"), [
-            '&gt; REQ',
+            '➡️',
             endpoint,
             step.label or '',
         ]))
         ret[-1].node.attrs['class'] = 'req'
+        i += 1
+    if endobj and endobj.checks:
+        ret.append(Tree.mk(Node.mk('div', style=f"grid-row: {i + 1}; grid-column: {col2} / {col2 + 1}"), [
+            Tree.mk('div', ['✅', check])
+            for check in endobj.checks
+        ]))
+        ret[-1].node.attrs['class'] = 'checks'
+        i += 1
     if step.response:
-        ret.append(Tree.mk(Node.mk('div', style=f"grid-row: {i + 2}; {col}"), [
-            '&lt; RES',
+        ret.append(Tree.mk(Node.mk('div', style=f"grid-row: {i + 1}; {col}"), [
+            Tree.mk(Node.mk('div', style="float: right"), ['⬅️']),
             endpoint,
             step.label or '',
         ]))
@@ -54,7 +62,7 @@ def render_grid_step(spec, i, step):
 
 def render_grid(spec):
     ""
-    div = Tree.mk(Node.mk('div', style="display: grid"))
+    div = Tree.mk(Node.mk('div', style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr))"))
     div.extend(render_grid_top(spec))
     for step in spec.flow:
         div.extend(render_grid_step(spec, len(div.children), step))

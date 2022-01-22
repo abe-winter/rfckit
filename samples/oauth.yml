@@ -19,19 +19,19 @@ roles:
     ref:
       url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.1
       desc: An entity capable of granting access to a protected resource. When the resource owner is a person, it is referred to as an end-user.
-    icon: https://upload.wikimedia.org/wikipedia/commons/f/ff/IE_Unix.PNG
+    icon: 👤
   resource-server:
-    icon: https://upload.wikimedia.org/wikipedia/commons/8/8c/Gmail_Icon_%282013-2020%29.svg
+    icon: 📧
     ref:
       url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.1
       desc: The server hosting the protected resources, capable of accepting and responding to protected resource requests using access tokens.
   client:
-    icon: https://content.linkedin.com/content/dam/me/business/en-us/amp/brand-site/v2/bg/LI-Bug.svg.original.svg
+    icon: 🕸️
     ref:
       url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.1
       desc: An application making protected resource requests on behalf of the resource owner and with its authorization.  The term "client" does not imply any particular implementation characteristics (e.g., whether the application executes on a server, a desktop, or other devices).
   authorization-server:
-    icon: https://upload.wikimedia.org/wikipedia/commons/8/8c/Gmail_Icon_%282013-2020%29.svg
+    icon: 🆔
     ref:
       url: https://datatracker.ietf.org/doc/html/rfc6749#section-1.1
       desc: The server issuing access tokens to the client after successfully authenticating the resource owner and obtaining authorization.

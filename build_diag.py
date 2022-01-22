@@ -1,15 +1,16 @@
 "build_diag -- build htm tree for sequence diagram"
 
 from htmtree import Tree, Node
+from spec import RefBlock
 
 def render_header(spec):
     ""
     div = Tree.mk('div')
-    div.append(Tree.mk('h4', [spec.header.title]))
+    div.append(Tree.mk('h2', [spec.header.title]))
     # todo: ref + desc
     return div
 
-def render_grid_top(spec):
+def render_grid_top(spec, docs):
     ""
     ret = []
     for i, name in enumerate(spec.header.roles):
@@ -17,15 +18,23 @@ def render_grid_top(spec):
         role = spec.roles.get(name)
         if role:
             children = []
+            label_span = Tree.mk('span')
+            children.append(label_span)
             if role.icon:
                 if role.icon.startswith('http'):
                     # todo: actually check valid url
                     # todo: embed data url
-                    children.append(Node.mk('img', src=role.icon, style="max-height: 2em"))
+                    label_span.append(Node.mk('img', src=role.icon, style="max-height: 2em"))
                 else:
-                    children.append(role.icon)
-            children.append(role.aka[0] if role.aka else name)
-        ret.append(Tree.mk(Node.mk('div', style=f"grid-column: {i + 1}; text-align: center"), children))
+                    label_span.append(role.icon)
+            if isinstance(role.ref, RefBlock):
+                anchor = f"role-{name}"
+                docs.append(render_ref(f"Role: {name}", anchor, role.ref, role.aka))
+                children[children.index(label_span)] = Tree.mk(Node.mk('a', href=f'#{anchor}'), [label_span])
+            elif isinstance(role.ref, str):
+                children.append(spec_link(role.ref))
+            label_span.append(role.aka[0] if role.aka else name)
+        ret.append(Tree.mk(Node.mk('div', style=f"grid-column: {i + 1}; text-align: center; font-size: large"), children))
     return ret
 
 def render_payloads(spec, req_res, children):
@@ -45,7 +54,26 @@ def render_payloads(spec, req_res, children):
         else:
             span.append(name)
 
-def render_grid_step(spec, i, step):
+def render_ref(title, anchor, ref, aliases=None):
+    assert isinstance(ref, RefBlock)
+    # todo: id for anchor
+    ret = Tree.mk(Node.mk('div', class_='docsec', id=anchor), [Tree.mk('h4', [title])])
+    if aliases:
+        ret.append(Tree.mk('p', ['Aliases:', ', '.join(aliases)]))
+    if ref.url:
+        ret.append(Tree.mk(Node.mk('a', href=ref.url), ['source']))
+    if ref.section:
+        ret.append(Tree.mk('span', ['Section', ref.section]))
+    if ref.desc:
+        ret.append(Tree.mk('p', [ref.desc]))
+    return ret
+
+def spec_link(ref):
+    assert isinstance(ref, str)
+    assert ref.startswith('http')
+    return Tree.mk(Node.mk('a', href=ref), ['spec'])
+
+def render_grid_step(spec, i, step, docs):
     ""
     ret = []
     # todo: support right-to-left. req/res direction shifts too
@@ -60,9 +88,13 @@ def render_grid_step(spec, i, step):
         ]))
         ret[-1].node.attrs['class'] = 'req'
         if endobj and endobj.request:
+            if isinstance(endobj.request.ref, RefBlock):
+                docs.append(render_ref(endobj.request.ref))
+            elif isinstance(endobj.request.ref, str):
+                ret[-1].append(spec_link(endobj.request.ref))
             if endobj.request.auth:
                 # todo: lookup auth
-                ret[-1].children.append(f'🔒 {endobj.request.auth}')
+                ret[-1].append(f'🔒 {endobj.request.auth}')
             render_payloads(spec, endobj.request, ret[-1].children)
         i += 1
     if endobj and endobj.checks:
@@ -87,12 +119,12 @@ def render_grid_step(spec, i, step):
             render_payloads(spec, endobj.response, ret[-1].children)
     return ret
 
-def render_grid(spec):
+def render_grid(spec, docs):
     ""
     div = Tree.mk(Node.mk('div', style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr))"))
-    div.extend(render_grid_top(spec))
+    div.extend(render_grid_top(spec, docs))
     for step in spec.flow:
-        div.extend(render_grid_step(spec, len(div.children), step))
+        div.extend(render_grid_step(spec, len(div.children), step, docs))
     return div
 
 def render_spec(spec):
@@ -101,8 +133,10 @@ def render_spec(spec):
         Tree.mk('head'),
         body,
     ])
+    docs = Tree.mk('div', [Tree.mk('h3', ['Docs'])])
     body.append(open('style.htm').read())
     body.append(render_header(spec))
-    body.append(render_grid(spec))
+    body.append(render_grid(spec, docs))
+    body.append(docs)
     # todo: docs section
     return root

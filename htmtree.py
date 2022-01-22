@@ -13,6 +13,8 @@ class Node:
 
     @classmethod
     def mk(cls, tag, **kwargs):
+        if 'class_' in kwargs:
+            kwargs['class'] = kwargs.pop('class_')
         return cls(tag=tag, attrs=kwargs or None)
 
     def open_tag(self, prefix, self_closing=False):

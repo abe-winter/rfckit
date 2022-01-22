@@ -35,17 +35,24 @@ class RoutePayload(BaseModel):
     contents: Optional[List[str]]
     optional: Optional[List[str]]
 
-class Request(BaseModel):
+class ReqRes(BaseModel):
+    "common base"
     ref: Optional[Ref]
-    auth: Optional[str] # pointer to auth
     payload: Optional[List[RoutePayload]]
     label: Optional[str]
 
-class Response(BaseModel):
-    ref: Optional[Ref]
-    payload: Optional[List[RoutePayload]]
+    def payloads(self):
+        return [
+            name
+            for payload in (self.payload or ())
+            for name in ((payload.contents or []) + (payload.optional or []))
+        ]
+
+class Request(ReqRes):
+    auth: Optional[str] # pointer to auth
+
+class Response(ReqRes):
     redirect: Optional[str]
-    label: Optional[str]
 
 class Endpoint(BaseModel):
     abbrev: Optional[str]

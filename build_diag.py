@@ -28,6 +28,23 @@ def render_grid_top(spec):
         ret.append(Tree.mk(Node.mk('div', style=f"grid-column: {i + 1}; text-align: center"), children))
     return ret
 
+def render_payloads(spec, req_res, children):
+    payloads = req_res.payloads()
+    if not payloads:
+        return
+    span = Tree.mk('span')
+    span.node.attrs = {'class': 'flat-group'}
+    children.append(span)
+    span.append(Tree.mk('b', ['payload']))
+    for name in payloads:
+        payload = spec.payloads.get(name)
+        if payload:
+            # todo: link to ref
+            # todo: img url icon
+            span.append(f'{payload.icon} {name}')
+        else:
+            span.append(name)
+
 def render_grid_step(spec, i, step):
     ""
     ret = []
@@ -40,9 +57,13 @@ def render_grid_step(spec, i, step):
         ret.append(Tree.mk(Node.mk('div', style=f"grid-row: {i + 1}; {col}"), [
             '➡️',
             endpoint,
-            step.label or '',
         ]))
         ret[-1].node.attrs['class'] = 'req'
+        if endobj and endobj.request:
+            if endobj.request.auth:
+                # todo: lookup auth
+                ret[-1].children.append(f'🔒 {endobj.request.auth}')
+            render_payloads(spec, endobj.request, ret[-1].children)
         i += 1
     if endobj and endobj.checks:
         ret.append(Tree.mk(Node.mk('div', style=f"grid-row: {i + 1}; grid-column: {col2} / {col2 + 1}"), [
@@ -55,9 +76,15 @@ def render_grid_step(spec, i, step):
         ret.append(Tree.mk(Node.mk('div', style=f"grid-row: {i + 1}; {col}"), [
             Tree.mk(Node.mk('div', style="float: right"), ['⬅️']),
             endpoint,
-            step.label or '',
         ]))
         ret[-1].node.attrs['class'] = 'res'
+        if endobj and endobj.response:
+            if endobj.response.redirect:
+                ret[-1].append(Tree.mk(Node.mk('span', class_='flat-group'), [
+                    Tree.mk('b', ['redirect']),
+                    endobj.response.redirect,
+                ]))
+            render_payloads(spec, endobj.response, ret[-1].children)
     return ret
 
 def render_grid(spec):
@@ -79,8 +106,3 @@ def render_spec(spec):
     body.append(render_grid(spec))
     # todo: docs section
     return root
-    # roles: Dict[str, Role]
-    # endpoints: Dict[str, Endpoint]
-    # payloads: Dict[str, Payload]
-    # auth: Dict[str, Auth]
-    # flow: List[FlowStep]

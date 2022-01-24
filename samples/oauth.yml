@@ -45,6 +45,10 @@ endpoints:
       desc: used by the client to obtain authorization from the resource owner via user-agent redirection
     request:
       ref: https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1
+      payload:
+      - kind: querystring
+        contents: [client-identifier, requested-scope, redirection-uri]
+        optional: [local-state]
     checks:
     - user-agent is authenticated
     - resource-owner grants client's access request

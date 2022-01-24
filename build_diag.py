@@ -55,7 +55,7 @@ def render_payloads(spec, req_res, children, docs, prefix):
         if payload:
             # todo: img url icon
             if isinstance(payload.ref, RefBlock):
-                anchor = f'{prefix}-pay-${name}'
+                anchor = f'{prefix}-pay-{name}'
                 span.append(Tree.mk(Node.mk('a', href=f'#{anchor}'), [f'{payload.icon} {name}']))
                 docs.append(render_ref(f'Payload: {name}', anchor, payload.ref))
             else:

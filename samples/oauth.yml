@@ -91,6 +91,7 @@ endpoints:
         contents: [client-identifier, requested-scope, redirection-uri]
         optional: [local-state]
       redirect: authorization
+
 payloads:
   client-identifier:
     icon: 📛

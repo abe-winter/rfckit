@@ -10,4 +10,4 @@ The goal is to be able to read an RFC in the context of a sequence diagram.
 
 The reach goal is to develop markup formats that can exist *within* RFCs so these diagrams are generated automatically from written specs.
 
-There is a sample spec in this codebase for the oauth 2.0 authorization code grant (in samples/). Nobody has reviewed it and it may or may not be right. You can view the generated output at ... (TBD).
+There is a sample spec in this codebase for the oauth 2.0 authorization code grant (in samples/). Nobody has reviewed it and it may or may not be right. You can view the generated output for the [oauth 2.0 authorization flow](https://abe-winter.github.io/2022/01/23/oauth.html) (based on the [oauth sample spec](./samples/oauth.yml) in this repo).

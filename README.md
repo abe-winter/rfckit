@@ -12,7 +12,7 @@ The reach goal is to develop markup formats that can exist *within* RFCs so thes
 
 ## Example
 
-There is a sample spec in this codebase for the oauth 2.0 authorization code grant (in samples/). Nobody has reviewed it and it may or may not be right. You can view the generated output for the [oauth 2.0 authorization flow](https://abe-winter.github.io/2022/01/23/oauth.html) (based on the [oauth sample spec](./samples/oauth.yml) in this repo).
+You can view the generated output for the [oauth 2.0 authorization flow](https://abe-winter.github.io/2022/01/23/oauth.html) (based on the [oauth sample spec](./samples/oauth.yml) in this repo).
 
 ## Who should use this
 
